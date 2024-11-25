@@ -35,8 +35,6 @@ function activate(context) {
             );
             return;
         }
-        
-        
 
         // 检测文件语言类型或后缀
         const languageId = document.languageId;
@@ -61,14 +59,13 @@ function activate(context) {
                 return;
             }
         }
-        
 
         // 获取当前光标所在的上下文
-        const currentContext = getContext(document, selection.start.line);
-        const { className, functionName } = currentContext;
+        // const currentContext = getContext(document, selection.start.line);
+        // const { className, functionName } = currentContext;
 
         // 判断选中内容类型并生成打印语句
-        const logStatement = generateLogStatement(languageId === 'vue' ? 'javascript' : languageId, selectedText, className, functionName);
+        const logStatement = generateLogStatement(languageId === 'vue' ? 'javascript' : languageId, selectedText, selection.start.line);
 
         if (!logStatement) {
             vscode.window.withProgress(
@@ -87,8 +84,6 @@ function activate(context) {
             );
             return;
         }
-        
-        
 
         // 获取插入位置
         const linePosition = selection.start.line;
@@ -127,36 +122,71 @@ function isInScriptBlock(document, currentLine) {
 }
 
 /**
- * 获取当前上下文（类名和函数名）
+ * 获取当前打印的行号
  */
-function getContext(document, currentLine) {
-    const textLines = document.getText().split('\n');
-    let className = null;
-    let functionName = null;
-
-    for (let i = currentLine; i >= 0; i--) {
-        const line = textLines[i].trim();
-
-        if (/class\s+(\w+)/.test(line)) {
-            className = line.match(/class\s+(\w+)/)[1];
-        }
-
-        if (/function\s+(\w+)/.test(line) || /(\w+)\s*=\s*function/.test(line) || /(def|defn)\s+(\w+)/.test(line)) {
-            functionName = line.match(/function\s+(\w+)/)?.[1] ||
-                line.match(/(\w+)\s*=\s*function/)?.[1] ||
-                line.match(/(def|defn)\s+(\w+)/)?.[2];
-        }
-
-        if (className && functionName) {
-            break;
-        }
-    }
-
-    return { className, functionName };
+function getCurrentLineNumber(document, line) {
+    return line + 2; // 因为索引是从 0 开始的，返回行号时加 1
 }
 
-function generateLogStatement(languageId, content,className, functionName) {
-    const prefix = `${className ? `${className} -> ` : ''}${functionName ? `${functionName} -> ` : ''}`;
+/**
+ * 获取当前上下文（类名和函数名）
+ */
+// function getContext(document, currentLine) {
+//     const textLines = document.getText().split('\n');
+//     let className = null;
+//     let functionName = null;
+//     let insideClass = false;  // 是否在类内部
+//     let currentIndentation = 0;  // 用于跟踪 Python 函数的缩进
+
+//     // 获取当前行的缩进级别（用于 Python）
+//     function getIndentation(line) {
+//         let indentation = 0;
+//         while (line[indentation] === ' ') {
+//             indentation++;
+//         }
+//         return indentation;
+//     }
+
+//     for (let i = currentLine; i >= 0; i--) {
+//         const line = textLines[i].trim();
+
+//         // 匹配类名（适配 Ruby, Java, Python, JavaScript, TypeScript, Go, Rust）
+//         if (/class\s+(\w+)/.test(line)) {
+//             className = line.match(/class\s+(\w+)/)[1];  // 匹配如 `class ClassName`
+//             insideClass = true;  // 进入类的作用域
+//             continue; // 在类定义处继续向下处理
+//         }
+
+//         // 在类的作用域内
+//         if (insideClass) {
+//             // 处理 Python 类中的函数定义，关注缩进级别
+//             if (/(def|defn)\s+(\w+)\s*\(/.test(line)) {
+//                 functionName = line.match(/(def|defn)\s+(\w+)\s*\(/)[2]; // 获取函数名
+//                 // 如果是 __init__，跳过
+//                 if (functionName === '__init__') {
+//                     continue;
+//                 }
+//             }
+//         }
+
+//         // 检查是否结束函数作用域（Python 中会通过缩进减少来表示函数结束）
+//         if (insideClass && getIndentation(line) < currentIndentation) {
+//             currentIndentation = 0;
+//         }
+
+//         // 如果找到类名和函数名，且不在 __init__ 内，则退出
+//         if (className && functionName && functionName !== '__init__') {
+//             break; // 找到函数名时退出
+//         }
+//     }
+
+//     return { className, functionName };
+// }
+
+
+function generateLogStatement(languageId, content,currentLine) {
+    const lineNumber = getCurrentLineNumber(null, currentLine);  // 获取当前行号
+    const prefix = `${lineNumber} line ->`;
     const isString = /^["'`].*["'`]$/; // 检测字符串
     const isNumber = /^\d+$/; // 检测纯数字
     const isArray = /\[.*\]/; // 检测数组
