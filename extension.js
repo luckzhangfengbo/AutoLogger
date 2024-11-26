@@ -291,7 +291,18 @@ function generateLogStatement(languageId, content,currentLine) {
                 logStatement = `println!("${content}: {:?}", ${content});`;
             }
             break;
-
+        
+        case 'cpp':
+            if (isString.test(content)) {
+                logStatement = `std::cout << "${prefix}String value: " << ${content} << std::endl;`;
+            } else if (isNumber.test(content)) {
+                logStatement = `std::cout << "${prefix}Number value: " << ${content} << std::endl;`;
+            } else if (isBoolean.test(content)) {
+                logStatement = `std::cout << "${prefix}Boolean value: " << (${content} ? "true" : "false") << std::endl;`;
+            } else {
+                logStatement = `std::cout << "${prefix}${content}: " << ${content} << std::endl;`;
+            }
+            break;
         default:
             logStatement = null; // Unsupported language
             break;
