@@ -7,12 +7,15 @@
  * @LastEditTime: 2024-11-25 20:55:56
 -->
 
+![image](images/icon1.gif)
+
 # Auto Logger Log
 
 ## Overview
 
 **Auto Logger Log** is a VS Code extension designed to streamline the process of generating debug logs. It automatically generates print statements for selected variables, making it easier to log and debug code. The extension supports popular programming languages such as Java, Python, JavaScript, Go, and Rust.
 
+Version supports a minimum of 1.70.0
 ---
 
 ## Key Features

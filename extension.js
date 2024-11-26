@@ -186,7 +186,7 @@ function getCurrentLineNumber(document, line) {
 
 function generateLogStatement(languageId, content,currentLine) {
     const lineNumber = getCurrentLineNumber(null, currentLine);  // 获取当前行号
-    const prefix = `${lineNumber} line ->`;
+    const prefix = `${lineNumber} line -> `;
     const isString = /^["'`].*["'`]$/; // 检测字符串
     const isNumber = /^\d+$/; // 检测纯数字
     const isArray = /\[.*\]/; // 检测数组
